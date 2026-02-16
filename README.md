@@ -1,4 +1,4 @@
-Production ML Inference System
+# Production ML Inference System
 
 > **MLOps Assessment Project**: A production-ready text classification inference service with Docker containerization and Kubernetes orchestration.
 
@@ -14,7 +14,7 @@ This project demonstrates production-ready MLOps practices for deploying a machi
 **Key Documents:**
 - 📖 [Design & Decision Document](DESIGN_DECISIONS.md) - Architecture and trade-offs
 - 🚀 [Kubernetes Deployment Guide](k8s/README.md) - K8s manifests and scaling strategies
-- 🔧 [Docker & Kubernetes Explained](docs/DOCKER_KUBERNETES_EXPLAINED.md) - Detailed technical explanation
+
 - 📡 [API Examples](docs/API_EXAMPLES.md) - Request/response examples
 
 ---
@@ -72,7 +72,7 @@ mlops-inference/
 │   └── docker-compose.yml    # Local development
 ├── docs/                     # Documentation
 │   ├── API_EXAMPLES.md       # API usage examples
-│   └── DOCKER_KUBERNETES_EXPLAINED.md  # Technical deep dive
+
 ├── models/                   # Model packages (.pkl files)
 ├── streamlit_app.py          # Interactive web UI
 ├── config.yaml               # Application configuration
@@ -281,3 +281,112 @@ See [k8s/README.md](k8s/README.md#gpu-support) for details.
 - Prometheus for metrics collection
 - Grafana for visualization
 - ELK/EFK stack for log aggregation
+
+---
+
+## 🧪 Testing
+
+```bash
+# Run unit tests
+pytest
+
+# Test API locally
+python test.py
+
+# Load testing
+ab -n 1000 -c 10 -p payload.json -T application/json \
+  http://localhost:8000/predict
+```
+
+---
+
+## 🔄 Deployment Workflow
+
+```bash
+# 1. Build new image
+docker build -f docker/Dockerfile -t mlops-inference:v1.1 .
+
+# 2. Push to registry
+docker push your-registry/mlops-inference:v1.1
+
+# 3. Update Kubernetes deployment
+kubectl set image deployment/mlops-inference \
+  inference-api=your-registry/mlops-inference:v1.1
+
+# 4. Monitor rollout (zero downtime!)
+kubectl rollout status deployment/mlops-inference
+
+# 5. Rollback if needed
+kubectl rollout undo deployment/mlops-inference
+```
+
+---
+
+## 📚 Documentation
+
+- **[DESIGN_DECISIONS.md](DESIGN_DECISIONS.md)**: Architecture, technology choices, and trade-offs
+- **[k8s/README.md](k8s/README.md)**: Kubernetes deployment guide with GPU and scaling strategies
+- **[docs/API_EXAMPLES.md](docs/API_EXAMPLES.md)**: API usage examples with curl and Python
+
+---
+
+## 🛠️ Technology Stack
+
+- **API Framework**: FastAPI (async, auto-docs, type-safe)
+- **ML Libraries**: TensorFlow/Keras, scikit-learn
+- **Containerization**: Docker
+- **Orchestration**: Kubernetes
+- **Web UI**: Streamlit
+- **Text Processing**: NLTK
+
+---
+
+## 🎯 Key Design Decisions
+
+1. **Stateless Design**: Model loaded at startup, no persistent state
+   - ✅ Simple, scalable, fast
+   - ❌ Startup time ~30s (mitigated by readiness probes)
+
+2. **CPU Inference**: Cost-effective for small models
+   - ✅ $0.05/hour vs $0.50/hour for GPU
+   - ❌ Lower throughput (acceptable for current scale)
+
+3. **Rolling Updates**: Zero-downtime deployments
+   - ✅ Gradual rollout with health checks
+   - ❌ Slower than blue-green (acceptable trade-off)
+
+See [DESIGN_DECISIONS.md](DESIGN_DECISIONS.md) for full analysis.
+
+---
+
+## 🚦 Production Checklist
+
+- [x] Docker image optimized (slim base, layer caching)
+- [x] Kubernetes manifests with resource limits
+- [x] Health probes (liveness & readiness)
+- [x] Horizontal autoscaling configured
+- [x] Zero-downtime deployment strategy
+- [x] API documentation (OpenAPI/Swagger)
+- [x] Design document with trade-offs
+- [x] Monitoring and alerting (Prometheus/Grafana)
+- [ ] Log aggregation (ELK/EFK)
+- [ ] Security scanning (Trivy, Snyk)
+- [ ] CI/CD pipeline (GitHub Actions, GitLab CI)
+
+---
+
+## 📝 License
+
+This project is for assessment purposes.
+
+---
+
+## 🤝 Contributing
+
+This is an assessment project, but feedback is welcome!
+
+---
+
+## 📧 Contact
+
+For questions about this assessment project, please reach out via the submission platform.
