@@ -1,6 +1,7 @@
-# Kuve-3: Production ML Inference System
+Production ML Inference System
 
 > **MLOps Assessment Project**: A production-ready text classification inference service with Docker containerization and Kubernetes orchestration.
+
 
 ## 📋 Assessment Overview
 
@@ -34,19 +35,8 @@ This project demonstrates production-ready MLOps practices for deploying a machi
 
 ## 🏗️ Architecture
 
-```
-┌─────────────┐      ┌──────────────┐      ┌─────────────────┐
-│   Clients   │─────▶│ Load Balancer│─────▶│  K8s Service    │
-└─────────────┘      └──────────────┘      └────────┬────────┘
-                                                     │
-                                    ┌────────────────┼────────────────┐
-                                    │                │                │
-                                    ▼                ▼                ▼
-                              ┌─────────┐      ┌─────────┐      ┌─────────┐
-                              │  Pod 1  │      │  Pod 2  │      │  Pod 3  │
-                              │ (API +  │      │ (API +  │      │ (API +  │
-                              │  Model) │      │  Model) │      │  Model) │
-                              └─────────┘      └─────────┘      └─────────┘
+<img width="601" height="381" alt="mlops1 drawio" src="https://github.com/user-attachments/assets/5d54e134-02df-4d40-bab9-b3f1e7887062" />
+
 ```
 
 **Design Principles:**
