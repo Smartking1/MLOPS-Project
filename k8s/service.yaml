@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlops-inference-service
+  labels:
+    app: mlops-inference
+spec:
+  type: ClusterIP  
+  
+  selector:
+    app: mlops-inference  # Route traffic to pods with this label
+  
+  ports:
+  - port: 80           # Service listens on port 80
+    targetPort: 8000   # Forward to container port 8000
+    protocol: TCP
+    name: http
+  
+  sessionAffinity: None  # Round-robin load balancing (no sticky sessions)

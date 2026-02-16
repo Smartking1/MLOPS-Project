@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlops-inference
+  labels:
+    app: mlops-inference
+    version: v1.0
+spec:
+  replicas: 3  # Run 3 instances for high availability
+  
+  selector:
+    matchLabels:
+      app: mlops-inference
+  
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1        # Create 1 extra pod during updates
+      maxUnavailable: 0  # Keep all pods running during updates (zero downtime)
+  
+  template:
+    metadata:
+      labels:
+        app: mlops-inference
+        version: v1.0
+    
+    spec:
+      containers:
+      - name: inference-api
+        image: mlops-inference:latest  
+        imagePullPolicy: Never
+        
+        ports:
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+        
+        # Resource management 
+        resources:
+          requests:
+            cpu: "500m"      # Minimum 0.5 CPU cores guaranteed
+            memory: "1Gi"    # Minimum 1GB RAM guaranteed
+          limits:
+            cpu: "2000m"     # Maximum 2 CPU cores (can burst)
+            memory: "2Gi"    # Maximum 2GB RAM (OOMKilled if exceeded)
+        
+        # Liveness probe
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 30  # Wait 30s for model loading
+          periodSeconds: 10        # Check every 10 seconds
+          timeoutSeconds: 5        # Timeout after 5 seconds
+          successThreshold: 1      # 1 success = healthy
+          failureThreshold: 3      # 3 failures = restart container
+        
+        # Readiness probe
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 10  
+          periodSeconds: 5        
+          timeoutSeconds: 3        
+          successThreshold: 1      
+          failureThreshold: 2      
+        
+        # Environment variables
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: MODEL_VERSION
+          value: "v1.0"
+        
+        # Mount configuration from ConfigMap
+        volumeMounts:
+        - name: config
+          mountPath: /app/config.yaml
+          subPath: config.yaml
+          readOnly: true
+        
+        # Security context
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false  
+      
+      # Define volumes
+      volumes:
+      - name: config
+        configMap:
+          name: mlops-inference-config
+          items:
+          - key: config.yaml
+            path: config.yaml
+      
+      # Restart policy
+      restartPolicy: Always
+      
+      # DNS policy
+      dnsPolicy: ClusterFirst
+      
+      # Termination grace period
+      terminationGracePeriodSeconds: 30
